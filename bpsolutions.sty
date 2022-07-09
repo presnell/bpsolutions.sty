@@ -1,0 +1,150 @@
+%%% bpsolutions.sty 
+%%% Brett Presnell, presnell@stat.ufl.edu
+%%% (Last modified Mar 2, 2004)
+%%%
+%%% TODO: Change vskip to solutionskip or something, and make it a
+%%% length with a sensible default value.
+%%%
+%%% TODO: Use this to replace the solutions stuff in bpexam.sty.
+%%%
+%%% This provides an on/off switch (show/noshow) for showing a
+%%% solutions environment, plus a few options:
+%%% 
+%%% indent: to indent paragraphs in the solution
+%%% 
+%%% vskip: to add vertical space (1.0\baselineskip) above and below
+%%% 
+%%% normalsize(default)/small/footnotesize
+%%% 
+%%% italic/slanted/sanserif
+
+\ProvidesPackage{bpsolutions}
+\RequirePackage{verbatim}  % Defines \comment and \endcomment.
+\RequirePackage{calc} 
+\RequirePackage{etoolbox} % Just for checking if environments already defined.
+
+%%% Solution environment and associated options.
+
+\newcommand{\solntext}{}
+\newenvironment{solution}{}{}
+
+\newlength{\solnparindent}
+\setlength{\solnparindent}{15pt}
+\newlength{\soln@parindent}
+\setlength{\soln@parindent}{0pt}
+
+\newlength{\solnvskip}
+\setlength{\solnvskip}{1.0\baselineskip}
+\newlength{\soln@vskip}
+\setlength{\soln@vskip}{0pt}
+
+\DeclareOption{indent}{%
+  \setlength{\soln@parindent}{\solnparindent}}
+
+\DeclareOption{vskip}{%
+  \setlength{\soln@vskip}{\solnvskip}}
+
+\newcommand{\solnsize}{\normalsize}
+\DeclareOption{normalsize}{%
+  \renewcommand{\solnsize}{\normalsize}}
+\DeclareOption{small}{%
+  \renewcommand{\solnsize}{\small}}
+\DeclareOption{footnotesize}{%
+  \renewcommand{\solnsize}{\footnotesize}}
+
+\newcommand{\solnfont}{\normalfont}
+\DeclareOption{italic}{%
+  \renewcommand{\solnfont}{\itshape}}
+\DeclareOption{slanted}{%
+  \renewcommand{\solnfont}{\slshape}}
+\DeclareOption{sanserif}{%
+  \renewcommand{\solnfont}{\sffamily}}
+
+\DeclareOption{show}{%
+  \renewcommand{\solntext}[1]{#1}%
+  \renewenvironment{solution}[1][]{%
+  \setlength{\parindent}{\parindent + \soln@parindent}%
+  \vspace{\soln@vskip}%
+  \solnfont\solnsize #1 }{\vspace{\soln@vskip}}}
+
+\DeclareOption{noshow}{%
+  \renewcommand{\solntext}[1]{}%
+  \renewenvironment{solution}[1][]{\comment}{\endcomment}}
+
+\DeclareOption{solutions}{\ExecuteOptions{show}}
+\DeclareOption{nosolutions}{\ExecuteOptions{noshow}}
+
+%%% Hint environment and associated options.
+
+\newenvironment{hint}{}{}
+\newcommand{\hintro}{Hint:}
+% \newlength{\hintparindent}
+% \setlength{\hintparindent}{15pt}
+% \newlength{\hint@parindent}
+% \setlength{\hint@parindent}{0pt}
+
+\newlength{\hintvskip}
+\setlength{\hintvskip}{1.0\baselineskip}
+\newlength{\hint@vskip}
+\setlength{\hint@vskip}{0pt}
+
+% \DeclareOption{hintindent}{%
+%   \setlength{\hint@parindent}{\hintparindent}}
+
+\DeclareOption{vskip}{%
+  \setlength{\hint@vskip}{\hintvskip}}
+
+\newcommand{\hintsize}{\normalsize}
+\newcommand{\hintfont}{\itshape}
+
+\DeclareOption{hints}{\renewenvironment{hint}[1][]{%
+  % \setlength{\parindent}{\parindent + \hint@parindent}%
+  \vspace{\hint@vskip}%
+  \hintfont\hintsize\hintro #1 }{\vspace{\hint@vskip}}}
+
+\DeclareOption{nohints}{%
+  \renewenvironment{hint}[1][]{\comment}{\endcomment}}
+
+% %%% Source command and associated options.
+
+\newcommand{\source}[1]{}
+\newcommand{\sourceleftpunct}{(}
+\newcommand{\sourcerightpunct}{)}
+\newcommand{\sourcefont}{\normalfont}
+
+\DeclareOption{sources}{\renewcommand{\source}[1]{\sourcefont\sourceleftpunct#1\sourcerightpunct}}
+
+\DeclareOption{nosources}{\renewcommand{\source}[1]{}}
+
+%%% Required by and requires commands and associated options.
+
+\newcommand{\requiredby}[1]{}
+\newcommand{\requires}[1]{}
+\newcommand{\requiresleftpunct}{(}
+\newcommand{\requiresrightpunct}{)}
+\newcommand{\requiresfont}{\normalfont}
+
+\DeclareOption{dependencies}{%
+  \renewcommand{\requiredby}[1]{%
+    \requiresfont\requiresleftpunct Required by #1\requiresrightpunct}%
+  \renewcommand{\requires}[1]{%
+    \requiresfont\requiresleftpunct Requires #1\requiresrightpunct}%
+}
+
+\DeclareOption{nodependencies}{%
+  \renewcommand{\requiredby}[1]{}%
+  \renewcommand{\requires}[1]{}%
+}
+
+%%% Aside environment, if not already defined (maybe I should drop this?)
+\ifcsmacro{aside}{}{
+  \let\endaside\undefined%
+  \newenvironment{aside}{\begin{quotation}\footnotesize}%
+    {\end{quotation}}
+}
+
+\ExecuteOptions{noshow}
+\ExecuteOptions{nohints}
+\ExecuteOptions{nosources}
+\ExecuteOptions{nodependencies}
+\ProcessOptions
